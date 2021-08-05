@@ -56,6 +56,8 @@ def register():
 
 @app.route('/login')
 def login():
+    session.permanent = True
+
     name = request.args.get('name')
     pwd = request.args.get('pwd')
 
@@ -112,11 +114,22 @@ def get_event():
     x2 = request.args.get('x2')
     y2 = request.args.get('y2')
 
+    columns = ["id", "x", "y", "name", "customer_name"]
+
     sql = "select * from event where x >= %s and x <= %s and y >= %s and y <= %s" % (x1, x2, y1, y2)
     rows = dbaccess.select_table(sql)
     if len(rows) >= 1:
         result['ret'] = 'success'
-        result['events'] = rows
+
+        events = []
+        for row in rows:
+            event = {}
+            for i in range(len(row)):
+                event[columns[i]] = row[i]
+
+            events.append(event)
+
+        result['events'] = events
     else:
         result['ret'] = 'failed'
 
@@ -157,9 +170,18 @@ def get_comment():
     event_id = request.args.get('event_id')
     sql = "select * from comment where event_id = %s" % event_id
     rows = dbaccess.select_table(sql)
+    columns = ["id", "event_id", "content", "customer_name"]
     if len(rows) >= 1:
         result['ret'] = 'success'
-        result['comments'] = rows
+        comments = []
+        for row in rows:
+            comment = {}
+            for i in range(len(row)):
+                comment[columns[i]] = row[i]
+
+            comments.append(comment)
+
+        result['comments'] = comments
     else:
         result['ret'] = 'failed'
 
